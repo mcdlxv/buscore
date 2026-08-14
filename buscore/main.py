@@ -1,7 +1,12 @@
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from buscore.runtime import Runtime
 from buscore.web.app import create_app
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s")
 
 runtime: Runtime | None = None
 

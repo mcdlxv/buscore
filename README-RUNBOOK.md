@@ -9,8 +9,19 @@
 4. `make up` — поднимает БД и приложение, накатывает миграции.
 5. `make seed` — демо-данные. СРАЗУ смените пароли admin/sb/boss в БД
    (страница управления пользователями появится в Плане 2; пока — через psql).
-6. `make demo` + `REPLAY_FILE=/app/demo_day.jsonl` в `.env` + `make up` —
+6. `make demo` + `REPLAY_FILE=/app/data/demo_day.jsonl` в `.env` + `make up` —
    живая лента на синтетическом дне: http://localhost:8000/feed (sb/sb123).
+   Файл лежит в `./data` на хосте и переживает пересборку контейнера.
+
+## Подключить Telegram-уведомления
+
+1. Создать бота у @BotFather → токен в `TG_BOT_TOKEN` (`.env`).
+2. Узнать свой chat id у @userinfobot → в `TG_ADMIN_CHAT_ID` (`.env`) —
+   на него пойдут тревоги watchdog и сводки бюджета; при `make seed`
+   он же подставится админу.
+3. Включить личные уведомления сотруднику (пока без UI, одной командой):
+   `docker compose exec db psql -U bus -d buscore -c "UPDATE users SET tg_chat_id='<CHAT_ID>' WHERE login='sb'"`
+   Пустой `notify_types` = все типы событий; список типов — выборочно.
 
 ## Разработка без Docker (Windows, локальный PostgreSQL)
 

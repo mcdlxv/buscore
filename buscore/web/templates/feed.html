@@ -16,6 +16,7 @@
   </div>
 </div>
 <div hx-ext="sse" sse-connect="/feed/stream">
+  <p class="muted" style="margin:0 0 8px">● live — новые события появляются сверху</p>
   <div id="cards" sse-swap="event" hx-swap="afterbegin"
        hx-get="/feed/cards?status={{ status }}" hx-trigger="load"></div>
 </div>

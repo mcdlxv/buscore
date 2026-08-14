@@ -5,5 +5,7 @@ __pycache__/
 *.pyc
 .venv/
 clips/
+data/
+demo_day.jsonl
 *.mp4
 .DS_Store

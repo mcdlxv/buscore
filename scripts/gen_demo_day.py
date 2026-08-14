@@ -11,6 +11,7 @@
 import json
 import sys
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 EXPECTED = {"speeding": 1, "stop_skip": 1, "harsh_brake": 1,
             "long_idle": 1, "route_deviation": 1}
@@ -20,7 +21,10 @@ LAT_PER_M = 1 / 110_540          # градусов широты на метр
 
 class Day:
     def __init__(self):
-        self.ts = datetime(2026, 8, 13, 4, 0, tzinfo=timezone.utc)  # 09:00 Алматы
+        # сегодня 09:00 по Алматы — чтобы дата событий совпадала с датой смены
+        today = datetime.now(ZoneInfo("Asia/Almaty"))
+        start = today.replace(hour=9, minute=0, second=0, microsecond=0)
+        self.ts = start.astimezone(timezone.utc)
         self.lat = 43.2360        # депо
         self.lon = LON
         self.rows: list[dict] = []

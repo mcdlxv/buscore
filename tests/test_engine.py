@@ -26,3 +26,41 @@ def test_daily_budget_caps_publications():
     assert f.allow("117", _cand(10)) is True
     assert f.allow("117", _cand(20)) is False    # бюджет исчерпан
     assert f.budget_exceeded_today(_cand(20).ts_start) is True
+
+def test_day_rollover_only_moves_forward():
+    """Ретроспективные точки (догрузка истории) не сбрасывают бюджет дня."""
+    f = FilterChain(cooldowns={}, daily_budget=2, tz="Asia/Almaty")
+    assert f.allow("117", _cand(0)) is True
+    assert f.allow("117", _cand(10)) is True
+    assert f.allow("117", _cand(20)) is False            # бюджет исчерпан
+    yesterday = _cand(0)
+    yesterday.ts_start -= timedelta(days=1)
+    f.allow("117", yesterday)                            # вчерашняя точка
+    assert f.allow("117", _cand(30)) is False            # счётчик не сброшен
+    assert f.suppressed_today >= 2
+
+async def test_engine_calls_budget_callback():
+    from buscore.rules.engine import EventEngine
+    calls = []
+    async def publish(bus, cand):
+        pass
+    async def on_budget(cand):
+        calls.append(cand.type)
+    class AlwaysFire:
+        event_type = "speeding"
+        def process(self, sig, ctx):
+            return _cand(int(sig.ts.timestamp()) % 100000)
+    f = FilterChain(cooldowns={}, daily_budget=1, tz="Asia/Almaty")
+    eng = EventEngine([AlwaysFire()], f, publish, on_budget_exceeded=on_budget)
+    from buscore.rules.engine import BusContext
+    from buscore.geo import RouteGeometry
+    eng.contexts["117"] = BusContext(
+        bus_code="117", route_limit_kmh=50,
+        geometry=RouteGeometry([[43.0, 76.0], [43.1, 76.0]]), stops=[], config={})
+    from buscore.schemas import Signal
+    s1 = Signal(bus_code="117", ts=T0, lat=43.0, lon=76.0, speed_kmh=0)
+    s2 = Signal(bus_code="117", ts=T0 + timedelta(seconds=5), lat=43.0,
+                lon=76.0, speed_kmh=0)
+    await eng.process(s1)     # публикуется (бюджет 1)
+    await eng.process(s2)     # блок по бюджету -> колбэк
+    assert calls == ["speeding"]

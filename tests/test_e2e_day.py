@@ -25,7 +25,9 @@ async def test_demo_day_produces_expected_events(session, tmp_path):
 
     q = select(m.Event.type, func.count()).group_by(m.Event.type)
     counts = dict((await session.execute(q)).all())
-    for type_, minimum in EXPECTED.items():
-        assert counts.get(type_, 0) >= minimum, f"{type_}: {counts}"
-    total = sum(counts.values())
-    assert total <= 30, f"дневной бюджет нарушен: {counts}"
+    # спека §10: «найди ровно эти, не найди лишних»
+    assert counts == EXPECTED, f"расхождение с золотым днём: {counts}"
+    # атрибуция: каждое событие должно найти водителя по смене
+    unattributed = await session.scalar(
+        select(func.count(m.Event.id)).where(m.Event.driver_id.is_(None)))
+    assert unattributed == 0, "события без водителя — сломана привязка смены"

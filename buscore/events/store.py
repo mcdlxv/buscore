@@ -1,8 +1,10 @@
 import asyncio
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from buscore import models as m
+from buscore.config import get_settings
 from buscore.schemas import EventCandidate
 
 REJECT_REASONS = ["ложное срабатывание", "не нарушение", "дубль"]
@@ -24,7 +26,8 @@ class EventStore:
     async def publish(self, session: AsyncSession, bus_code: str,
                       cand: EventCandidate) -> int:
         bus = await session.scalar(select(m.Bus).where(m.Bus.code == bus_code))
-        day = cand.ts_start.astimezone(timezone.utc).date()
+        # день смены — по местному времени парка, не по UTC (спека §6)
+        day = cand.ts_start.astimezone(ZoneInfo(get_settings().tz)).date()
         shift = await session.scalar(select(m.Shift).where(
             m.Shift.bus_id == bus.id, m.Shift.day == day))
         ev = m.Event(type=cand.type, bus_id=bus.id, route_id=bus.route_id,

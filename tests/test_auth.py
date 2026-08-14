@@ -40,3 +40,10 @@ async def test_admin_can_update_rule(session):
     cfg = await session.get(m.RuleConfig, "speeding_margin_kmh")
     await session.refresh(cfg)
     assert cfg.value == 15
+
+async def test_tampered_cookie_redirects_to_login(session):
+    await seed(session)
+    async with await _client(create_app()) as c:
+        c.cookies.set("session", "eyJpZCI6MSwicm9sZSI6ImFkbWluIn0.forged")
+        r = await c.get("/feed")
+    assert r.status_code == 303 and r.headers["location"] == "/login"

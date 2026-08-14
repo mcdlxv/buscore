@@ -1,9 +1,12 @@
+from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Form, HTTPException, Request
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select
 from sse_starlette.sse import EventSourceResponse
 from buscore import models as m
+from buscore.config import get_settings
 from buscore.db import SessionMaker
 from buscore.events.store import REJECT_REASONS
 
@@ -25,7 +28,13 @@ async def _card_context(session, event: m.Event) -> dict:
     return {"e": event, "bus": bus, "driver": driver, "route": route}
 
 async def _stats(session) -> dict:
-    q = select(m.Event.status, func.count()).group_by(m.Event.status)
+    """Счётчики за текущий день по времени парка (спека §7: статистика дня)."""
+    tz = ZoneInfo(get_settings().tz)
+    day_start = (datetime.now(tz).replace(hour=0, minute=0, second=0,
+                                          microsecond=0))
+    q = (select(m.Event.status, func.count())
+         .where(m.Event.created_at >= day_start)
+         .group_by(m.Event.status))
     counts = dict((await session.execute(q)).all())
     return {"total": sum(counts.values()), "new": counts.get("new", 0),
             "confirmed": counts.get("confirmed", 0),

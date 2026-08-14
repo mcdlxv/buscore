@@ -4,8 +4,10 @@
 Пароли демо (СМЕНИТЬ на проде, см. README-RUNBOOK): admin/admin123, sb/sb123, boss/boss123
 """
 import asyncio
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from passlib.hash import bcrypt
+from buscore.config import get_settings
 from buscore.db import SessionMaker
 from buscore import models as m
 
@@ -44,14 +46,17 @@ async def seed(session) -> None:
     driver = m.Driver(full_name="Ахметов С.", personnel_no="D-045")
     session.add_all([bus, driver])
     await session.flush()
-    session.add(m.Shift(bus_id=bus.id, driver_id=driver.id, day=date.today()))
+    today_local = datetime.now(ZoneInfo(get_settings().tz)).date()
+    session.add(m.Shift(bus_id=bus.id, driver_id=driver.id, day=today_local))
     for key, value in RULE_DEFAULTS.items():
         session.add(m.RuleConfig(key=key, value=float(value),
                                  updated_at=datetime.now(timezone.utc)))
+    admin_chat = get_settings().tg_admin_chat_id   # если задан — админ сразу получает TG
     for login, pwd, role in [("admin", "admin123", "admin"),
                              ("sb", "sb123", "security"),
                              ("boss", "boss123", "manager")]:
-        session.add(m.User(login=login, password_hash=bcrypt.hash(pwd), role=role))
+        session.add(m.User(login=login, password_hash=bcrypt.hash(pwd), role=role,
+                           tg_chat_id=admin_chat if role == "admin" else ""))
     await session.commit()
 
 async def main() -> None:

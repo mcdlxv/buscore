@@ -5,8 +5,8 @@ up:
 seed:
 	docker compose exec app python -m scripts.seed_demo
 demo:
-	docker compose exec app python -m scripts.gen_demo_day /app/demo_day.jsonl
-	@echo "REPLAY_FILE=/app/demo_day.jsonl в .env и 'make up' — лента оживёт"
+	docker compose exec app python -m scripts.gen_demo_day /app/data/demo_day.jsonl
+	@echo "REPLAY_FILE=/app/data/demo_day.jsonl в .env и 'make up' — лента оживёт"
 test:
 	python -m pytest -q
 deploy:

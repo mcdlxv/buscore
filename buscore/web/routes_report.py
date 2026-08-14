@@ -40,4 +40,7 @@ async def report_csv(days: int = 7):
     for r in rows:
         buf.write(f"{r['type']};{r['bus']};{r['driver']};{r['route']};"
                   f"{r['confirmed']};{r['rejected']}\n")
-    return PlainTextResponse(buf.getvalue(), media_type="text/csv")
+    headers = {"Content-Disposition":
+               f'attachment; filename="buscore-report-{days}d.csv"'}
+    return PlainTextResponse(buf.getvalue(), media_type="text/csv",
+                             headers=headers)

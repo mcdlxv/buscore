@@ -1,4 +1,4 @@
-from buscore.rules.engine import BusContext, StopZone
+from buscore.rules.engine import BusContext
 from buscore.schemas import EventCandidate, Signal
 
 class StopSkipDetector:
