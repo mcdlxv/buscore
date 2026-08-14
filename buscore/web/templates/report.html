@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Отчёт{% endblock %}
+{% block content %}
+<div class="row" style="margin-bottom:12px">
+  <h3 style="margin:0">Отчёт за {{ days }} дн.</h3>
+  <a href="/report?days=7">неделя</a><a href="/report?days=30">месяц</a>
+  <a class="grow" href="/report.csv?days={{ days }}">Скачать CSV</a>
+</div>
+<table style="width:100%;border-collapse:collapse;background:#fff">
+  <tr style="text-align:left;border-bottom:2px solid #dde0e4">
+    <th>Тип</th><th>Борт</th><th>Водитель</th><th>Маршрут</th>
+    <th>Подтверждено</th><th>Отклонено</th></tr>
+  {% for r in rows %}
+  <tr style="border-bottom:1px solid #eef1f5">
+    <td>{{ TYPE_LABELS.get(r.type, r.type) }}</td><td>{{ r.bus }}</td>
+    <td>{{ r.driver }}</td><td>{{ r.route }}</td>
+    <td>{{ r.confirmed }}</td><td>{{ r.rejected }}</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

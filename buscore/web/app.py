@@ -8,6 +8,7 @@ def create_app() -> FastAPI:
     from buscore.web.auth import require_role, router as auth_router
     from buscore.web.routes_feed import router as feed_router
     from buscore.web.routes_admin import router as admin_router
+    from buscore.web.routes_report import router as report_router
 
     def guard_security(request: Request):
         return require_role(request, "security")
@@ -21,8 +22,7 @@ def create_app() -> FastAPI:
     app.include_router(auth_router)
     app.include_router(feed_router, dependencies=[Depends(guard_security)])
     app.include_router(admin_router, dependencies=[Depends(guard_admin)])
-    # report_router подключается в Задаче 14 с guard_manager
-    _ = guard_manager
+    app.include_router(report_router, dependencies=[Depends(guard_manager)])
 
     @app.get("/health")
     async def health():
