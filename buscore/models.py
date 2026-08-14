@@ -76,12 +76,16 @@ class Event(Base):
     lon: Mapped[float] = mapped_column(Float)
     confidence: Mapped[float] = mapped_column(Float, default=1.0)
     details: Mapped[dict] = mapped_column(JSON, default=dict)
-    clip_id: Mapped[int | None] = mapped_column(ForeignKey("clips.id"))
+    clip_id: Mapped[int | None] = mapped_column(ForeignKey("clips.id", ondelete="SET NULL"))
     verdict_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
     verdict_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     reject_reason: Mapped[str | None] = mapped_column(String(64))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    __table_args__ = (Index("ix_events_status_created", "status", "created_at"),)
+    __table_args__ = (Index("ix_events_status_created", "status", "created_at"),
+                      Index("ix_events_bus_created", "bus_id", "created_at"),
+                      Index("ix_events_driver_created", "driver_id", "created_at"),
+                      Index("ix_events_route_created", "route_id", "created_at"),
+                      Index("ix_events_clip", "clip_id"))
 
 class Clip(Base):
     __tablename__ = "clips"
