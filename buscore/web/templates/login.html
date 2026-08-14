@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<form method="post" action="/login" class="card" style="max-width:360px;margin:60px auto">
+  <h3>buscore — вход</h3>
+  {% if error %}<p style="color:#b91c1c">{{ error }}</p>{% endif %}
+  <p><input name="login" placeholder="Логин" style="width:100%"></p>
+  <p><input name="password" type="password" placeholder="Пароль" style="width:100%"></p>
+  <button class="pri" type="submit">Войти</button>
+</form>
+{% endblock %}

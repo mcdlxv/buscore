@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Пороги правил{% endblock %}
+{% block content %}
+<h3>Пороги правил (применяются после перезапуска replay/конвейера)</h3>
+{% for r in rules %}
+<form method="post" action="/admin/rules" class="row card">
+  <code style="min-width:220px">{{ r.key }}</code>
+  <input type="hidden" name="key" value="{{ r.key }}">
+  <input name="value" value="{{ r.value }}" style="width:100px">
+  <button type="submit">Сохранить</button>
+  <span class="muted">{{ r.updated_at or "" }}</span>
+</form>
+{% endfor %}
+{% endblock %}
