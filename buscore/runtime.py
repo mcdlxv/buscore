@@ -85,6 +85,36 @@ class Runtime:
                                   settings.replay_rebase, sink)
             self.tasks.append(asyncio.create_task(player.run()))
 
+        # --- уведомления: подписка на поток событий store ---
+        from buscore.notify.telegram import Notifier, Watchdog, tg_send
+        notifier = Notifier(quiet=(settings.quiet_start_hour,
+                                   settings.quiet_end_hour), tz=settings.tz)
+        queue = self.store.subscribe()
+
+        async def notify_loop():
+            while True:
+                payload = await queue.get()
+                async with SessionMaker() as session:
+                    users = [{"chat_id": u.tg_chat_id, "types": u.notify_types}
+                             for u in (await session.scalars(
+                                 select(m.User).where(m.User.tg_chat_id != ""))).all()]
+                await notifier.notify(users, payload)
+
+        watchdog = Watchdog(threshold_s=600,
+                            work_hours=(settings.work_start_hour,
+                                        settings.work_end_hour), tz=settings.tz)
+
+        async def watchdog_loop():
+            while True:
+                await asyncio.sleep(60)
+                alert = watchdog.check(self.last_signal_at,
+                                       datetime.now(timezone.utc))
+                if alert:
+                    await tg_send(settings.tg_admin_chat_id, alert)
+
+        self.tasks.append(asyncio.create_task(notify_loop()))
+        self.tasks.append(asyncio.create_task(watchdog_loop()))
+
     async def stop(self) -> None:
         for t in self.tasks:
             t.cancel()
