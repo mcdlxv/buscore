@@ -115,6 +115,16 @@ class Runtime:
         self.tasks.append(asyncio.create_task(notify_loop()))
         self.tasks.append(asyncio.create_task(watchdog_loop()))
 
+        from buscore.maintenance import purge_old_signals
+
+        async def retention_loop():
+            while True:
+                await asyncio.sleep(24 * 3600)
+                async with SessionMaker() as session:
+                    await purge_old_signals(session)
+
+        self.tasks.append(asyncio.create_task(retention_loop()))
+
     async def stop(self) -> None:
         for t in self.tasks:
             t.cancel()
