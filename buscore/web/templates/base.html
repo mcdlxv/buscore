@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>buscore — {% block title %}{% endblock %}</title>
+<script src="https://unpkg.com/htmx.org@2.0.4"></script>
+<script src="https://unpkg.com/htmx-ext-sse@2.2.2"></script>
+<style>
+ body{font-family:system-ui,sans-serif;margin:0;background:#f5f6f8;color:#1a1c1f}
+ .top{display:flex;gap:16px;align-items:center;padding:10px 16px;background:#fff;
+      border-bottom:1px solid #dde0e4}
+ .top a{color:#1a1c1f;text-decoration:none;font-weight:600}
+ main{max-width:900px;margin:16px auto;padding:0 12px}
+ .stats{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+ .stat{background:#fff;border:1px solid #dde0e4;border-radius:10px;padding:8px 14px}
+ .stat b{font-size:18px;display:block}
+ .card{background:#fff;border:1px solid #dde0e4;border-radius:10px;
+       padding:12px 14px;margin-bottom:10px}
+ .card.new{border-left:4px solid #2563eb}
+ .badge{font-weight:600;font-size:13px;background:#eef1f5;border-radius:6px;
+        padding:2px 8px}
+ .muted{color:#66707c;font-size:13px}
+ .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+ .grow{margin-left:auto}
+ button{border:1px solid #c6ccd4;background:#fff;border-radius:8px;
+        padding:6px 14px;cursor:pointer;font-weight:600}
+ button.pri{background:#2563eb;border-color:#2563eb;color:#fff}
+ select,input{padding:6px;border:1px solid #c6ccd4;border-radius:8px}
+</style>
+</head>
+<body>
+<nav class="top">
+  <a href="/feed">Лента</a><a href="/report">Отчёт</a>
+  <span class="grow"></span>{% block nav %}{% endblock %}
+</nav>
+<main>{% block content %}{% endblock %}</main>
+</body>
+</html>

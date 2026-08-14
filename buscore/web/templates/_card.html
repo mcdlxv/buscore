@@ -1,0 +1,39 @@
+<div class="card {{ 'new' if e.status == 'new' }}" id="card-{{ e.id }}">
+  <div class="row">
+    <span class="badge">{{ TYPE_LABELS.get(e.type, e.type) }}</span>
+    <span class="muted">{{ e.ts_start.strftime("%H:%M:%S") }}</span>
+    {% if e.details.get("duration_s") %}
+      <span class="muted">{{ e.details["duration_s"] }} c</span>{% endif %}
+    <span class="muted grow">борт {{ bus.code }}{% if route %} · маршрут {{ route.name }}{% endif %}</span>
+  </div>
+  <div class="row muted">
+    {% if driver %}<span>Водитель: {{ driver.full_name }}</span>{% endif %}
+    {% for k, v in e.details.items() if k in
+       ["speed_max","limit_kmh","accel_ms2","distance_m","stop","min_speed_kmh","idle_s"] %}
+      <span>{{ k }}: {{ v }}</span>
+    {% endfor %}
+    <span>клип появится после подключения видеоплатформы (План 3)</span>
+  </div>
+  {% if e.status == "new" %}
+  <div class="row">
+    <form hx-post="/events/{{ e.id }}/verdict" hx-target="#card-{{ e.id }}"
+          hx-swap="outerHTML">
+      <input type="hidden" name="status" value="confirmed">
+      <button class="pri" type="submit">Подтвердить (1)</button>
+    </form>
+    <form hx-post="/events/{{ e.id }}/verdict" hx-target="#card-{{ e.id }}"
+          hx-swap="outerHTML" class="row">
+      <input type="hidden" name="status" value="rejected">
+      <select name="reason">
+        {% for r in REJECT_REASONS %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+      </select>
+      <button class="rej" type="submit">Отклонить (2)</button>
+    </form>
+  </div>
+  {% else %}
+  <div class="muted">
+    {{ "✓ Подтверждено" if e.status == "confirmed" else "✕ Отклонено: " ~ (e.reject_reason or "") }}
+    {% if e.verdict_at %} · {{ e.verdict_at.strftime("%H:%M") }}{% endif %}
+  </div>
+  {% endif %}
+</div>

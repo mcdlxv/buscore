@@ -1,0 +1,5 @@
+{% for c in cards %}
+  {% with e=c.e, bus=c.bus, driver=c.driver, route=c.route %}
+    {% include "_card.html" %}
+  {% endwith %}
+{% endfor %}

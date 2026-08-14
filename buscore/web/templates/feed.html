@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Лента событий{% endblock %}
+{% block content %}
+<div class="stats">
+  <div class="stat"><b>{{ stats.total }}</b><span class="muted">событий</span></div>
+  <div class="stat"><b>{{ stats.new }}</b><span class="muted">ждут разбора</span></div>
+  <div class="stat"><b>{{ stats.confirmed }}</b><span class="muted">подтверждено</span></div>
+  <div class="stat"><b>{{ stats.rejected }}</b><span class="muted">отклонено</span></div>
+  <div class="stat grow">
+    <select onchange="location='/feed?status='+this.value">
+      {% for s, label in [("all","Все"),("new","Новые"),
+                          ("confirmed","Подтверждённые"),("rejected","Отклонённые")] %}
+      <option value="{{ s }}" {{ "selected" if status == s }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+<div hx-ext="sse" sse-connect="/feed/stream">
+  <div id="cards" sse-swap="event" hx-swap="afterbegin"
+       hx-get="/feed/cards?status={{ status }}" hx-trigger="load"></div>
+</div>
+<script>
+document.addEventListener("keydown", (ev) => {           // горячие клавиши 1/2
+  if (ev.key !== "1" && ev.key !== "2") return;
+  const card = document.querySelector(".card.new");
+  if (!card) return;
+  const btn = card.querySelector(ev.key === "1" ? "button.pri" : "button.rej");
+  if (btn) btn.click();
+});
+</script>
+{% endblock %}
