@@ -1,5 +1,7 @@
 # BusCore — safety monitoring for a bus fleet
 
+[![ci](https://github.com/mcdlxv/buscore/actions/workflows/ci.yml/badge.svg)](https://github.com/mcdlxv/buscore/actions/workflows/ci.yml)
+
 Backend MVP for a transit operator's safety team: vehicle telemetry goes through violation detectors into a live event feed, where an officer confirms or rejects each event in seconds. Built solo with AI agents (Claude Code), spec-first and test-first: from design spec to reviewed MVP between 13 and 14 August 2026.
 
 > **Status:** MVP running on synthetic replay data — Plan 1 of 3. Computer-vision detectors (Plan 2) and live telematics and video clips (Plan 3) are designed in the spec but not built yet.
